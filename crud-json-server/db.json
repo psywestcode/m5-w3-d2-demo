@@ -1,24 +1,30 @@
 {
   "posts": [
     {
-      "id": 1,
       "title": "Lord of The Rings",
-      "author": "J.R.R. Tolkien"
+      "author": "J.R.R. Tolkien Sr.",
+      "id": "1"
     },
     {
-      "id": 2,
+      "id": "2",
       "title": "The Alchemist",
       "author": "Paul Coelho"
     },
     {
-      "id": 3,
+      "id": "3",
       "title": "Da Vinci Code",
       "author": "Dan Brown"
     },
     {
-      "id": 4,
+      "id": "4",
       "title": "A Tale of Two Cities",
       "author": "Charles Dickens"
+    },
+    {
+      "title": "wdcasc",
+      "author": "asdcdca",
+      "id": "n2ZaVxI6gS4"
     }
-  ]
+  ],
+  "$schema": "./node_modules/json-server/schema.json"
 }
