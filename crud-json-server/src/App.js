@@ -1,23 +1,24 @@
-import React from "react";
+import React, { Component } from "react";
 import Lists from "./Lists";
 import CreateList from "./CreateList";
+import "bootstrap/dist/css/bootstrap.min.css";
 
+class App extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      loading: false,
+      alldata: [],
+      singledata: {
+        title: "",
+        author: ""
+      }
+    };
+  }
 
-class App extends React.Component {
-    constructor(props) {
-      super(props);
-      this.state = {
-        loading: false,
-        alldata: [],
-        singledata: {
-          title: "",
-          author: ""
-        }
-      };
-    }
-
-    getLists = () => {
-    fetch("http://localhost:8000/posts")
+  // READ (GET all books)
+  getLists = () => {
+    fetch("http://localhost:3000/api/books") // Updated port to 3000
       .then(res => res.json())
       .then(result =>
         this.setState({
@@ -26,69 +27,93 @@ class App extends React.Component {
         })
       )
       .catch(console.log);
-   }
+  }
 
+  // Handle input changes
   handleChange = (event) => {
-  let title = this.state.singledata.title;
-  let author = this.state.singledata.author;
+    let title = this.state.singledata.title;
+    let author = this.state.singledata.author;
 
-  if (event.target.name === "title") title = event.target.value;
-  else author = event.target.value;
+    if (event.target.name === "title") title = event.target.value;
+    else author = event.target.value;
 
-  this.setState({
-    singledata: {
-      title: title,
-      author: author
-    }
-  });
-}
-
-// App.js handlers:
-getList = (event, id) => {
-  this.setState(
-    {
+    this.setState({
       singledata: {
-        title: "Loading...",
-        author: "Loading..."
+        title: title,
+        author: author
       }
-    },
-    () => {
-      fetch("http://localhost:8000/posts/" + id)
-        .then(res => res.json())
-        .then(result => {
-          this.setState({
-            singledata: {
-              title: result.title,
-              author: result.author ? result.author : ""
-            }
-          });
-        });
-    }
-  );
-}
-
-updateList = (event, id) => {
-  fetch("http://localhost:8000/posts/" + id, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(this.state.singledata)
-  })
-    .then(res => res.json())
-    .then(result => {
-      this.setState({
-        singledata: {
-          title: "",
-          author: ""
-        }
-      });
-      this.getLists();
     });
-}
+  }
 
-deleteList = (event, id) => {
-    fetch("http://localhost:8000/posts/" + id, { // Make sure this matches your updated port!
+  // CREATE (POST new book)
+  createList = () => {
+    fetch("http://localhost:3000/api/books", { // Updated port to 3000
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(this.state.singledata)
+    })
+      .then(res => res.json())
+      .then(result => {
+        this.setState({
+          singledata: {
+            title: "",
+            author: ""
+          }
+        });
+        this.getLists(); // Refresh table
+      });
+  }
+
+  // READ (GET single book for Update/Delete modals)
+  getList = (event, id) => {
+    this.setState(
+      {
+        singledata: {
+          title: "Loading...",
+          author: "Loading..."
+        }
+      },
+      () => {
+        fetch("http://localhost:3000/api/books/" + id) // Updated port to 3000
+          .then(res => res.json())
+          .then(result => {
+            this.setState({
+              singledata: {
+                title: result.title,
+                author: result.author ? result.author : ""
+              }
+            });
+          });
+      }
+    );
+  }
+
+  // UPDATE (PUT existing book)
+  updateList = (event, id) => {
+    fetch("http://localhost:3000/api/books/" + id, { // Updated port to 3000
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(this.state.singledata)
+    })
+      .then(res => res.json())
+      .then(result => {
+        this.setState({
+          singledata: {
+            title: "",
+            author: ""
+          }
+        });
+        this.getLists(); // Refresh table
+      });
+  }
+
+  // DELETE (DELETE existing book)
+  deleteList = (event, id) => {
+    fetch("http://localhost:3000/api/books/" + id, { // Updated port to 3000
       method: "DELETE"
     })
       .then(res => res.json())
@@ -99,66 +124,44 @@ deleteList = (event, id) => {
             author: ""
           }
         });
-        this.getLists(); // Refresh the table after deleting
+        this.getLists(); // Refresh table
       });
   }
 
-createList = () => {
-    fetch("http://localhost:8000/posts", { // Make sure this matches your current port (e.g., 8000)
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(this.state.singledata)
-    })
-      .then(res => res.json())
-      .then(result => {
-        // Clear the form
-        this.setState({
-          singledata: {
-            title: "",
-            author: ""
-          }
-        });
-        // Auto-refresh the table with the new data
-        this.getLists(); 
-      });
-  }
-
-   render() {
+  render() {
     const listTable = this.state.loading ? (
-      <span>Loading Data...... Please be patient</span>
+      <span>Loading Data...... Please be patience.</span>
     ) : (
       <Lists
         alldata={this.state.alldata}
         singledata={this.state.singledata}
         getList={this.getList}
         updateList={this.updateList}
-        deleteList={this.deleteList} // Add this line!
+        deleteList={this.deleteList}
         handleChange={this.handleChange}
       />
     );
 
-        
-
     return (
-      <div className="container">
-        <span className="title-bar">
-            <button type="button" className="btn btn-primary" onClick={this.getLists}>
+      <div className="container mt-4">
+        <span className="title-bar d-flex mb-3">
+          <button
+            type="button"
+            className="btn btn-primary me-2"
+            onClick={this.getLists}
+          >
             Get Lists
           </button>
           <CreateList
             singledata={this.state.singledata}
             handleChange={this.handleChange}
             createList={this.createList}
-  />
-</span>
+          />
+        </span>
         {listTable}
       </div>
-      
-      );
-    }
-
+    );
   }
+}
 
 export default App;
